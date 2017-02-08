@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>Hello, {{ user.nickname }}. Welcome to REST api homepage!! </h1>
+	{% for feature in features %}
+    	<div><p>{{ feature.service.function }} can be called at: <b>{{ feature.uri }}</b></p></div>
+    	{% endfor %}
+{% endblock %}

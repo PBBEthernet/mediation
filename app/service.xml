@@ -1,0 +1,23 @@
+<services xmlns="http://tail-f.com/ns/ncs">
+  <pbb-evpl xmlns="http://com/example/evp">
+    <name>EBD4050</name>
+    <bandwidth>10</bandwidth>
+    <connection-type>point-to-point</connection-type>
+    <uni-endpoints>
+      <device>elab9075.elab.tata</device>
+      <interface>GigabitEthernet0/0/0/19</interface>
+      <port-type>customer-vlan</port-type>
+      <cvlan>4050</cvlan>     
+      <ingress-vlan>4050</ingress-vlan>
+      <mac-address>a000.8500.0001</mac-address>
+    </uni-endpoints>
+    <uni-endpoints>
+      <device>elab9085.elab.tata</device>
+      <interface>GigabitEthernet0/0/0/19</interface>
+      <port-type>customer-vlan</port-type>
+      <cvlan>4050</cvlan>      
+      <ingress-vlan>4050</ingress-vlan>
+      <mac-address>a000.7500.0001</mac-address>
+    </uni-endpoints>
+  </pbb-evpl>
+</services>

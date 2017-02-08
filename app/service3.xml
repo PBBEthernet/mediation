@@ -1,0 +1,26 @@
+<services xmlns="http://tail-f.com/ns/ncs">
+  <pbb-evpl xmlns="http://com/example/evp">
+    <name>EBD12033001</name>
+    <bandwidth>75</bandwidth>
+    <uni-endpoints>
+      <device>elab9075.elab.tata</device>
+      <interface>GigabitEthernet0/0/0/16</interface>
+      <port-type>customer-vlan</port-type>
+      <cvlan>3000</cvlan>     
+      <ingress-vlan>110</ingress-vlan>
+      <bvid>CBD1203</bvid>
+      <mac-address>a000.8500.0001</mac-address>
+    </uni-endpoints>
+    <uni-endpoints>
+      <device>elab9085.elab.tata</device>
+      <interface>GigabitEthernet0/0/0/16</interface>
+      <port-type>customer-vlan</port-type>
+      <cvlan>3001</cvlan>      
+      <ingress-vlan>120</ingress-vlan>
+      <bvid>CBD1203</bvid>
+      <mac-address>a000.7500.0001</mac-address>
+      <operation>translate</operation>
+      <operation-vlan>3000</operation-vlan>
+    </uni-endpoints>
+  </pbb-evpl>
+</services>

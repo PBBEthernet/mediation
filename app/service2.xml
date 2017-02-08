@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<forwarding_construct>
+	<id>OVC1</id>	
+     <ovc_end_point>
+		<end_point_id>OVC_EP1</end_point_id>
+		<ingress_bw_cfg_cir>5</ingress_bw_cfg_cir>
+		<egress_bw_cfg_cir>50</egress_bw_cfg_cir>
+		<end_point_vlan_map_ce_vlan>10</end_point_vlan_map_ce_vlan>
+        <end_point_vlan_map_s_vlan>0</end_point_vlan_map_s_vlan>
+		<end_point_interface>
+			<interface_id>UNI_A</interface_id>
+			<interface_type>UNI</interface_type>
+			<physical_port_reference_node_id>Router 5</physical_port_reference_node_id>
+			<physical_port_reference_port>Port 5</physical_port_reference_port>
+		</end_point_interface>
+	</ovc_end_point>
+	<ovc_end_point>
+		<end_point_id>OVC_EP2</end_point_id>
+		<ingress_bw_cfg_cir>50</ingress_bw_cfg_cir>
+		<egress_bw_cfg_cir>5</egress_bw_cfg_cir>
+             <end_point_vlan_map_ce_vlan>0</end_point_vlan_map_ce_vlan>
+		<end_point_vlan_map_s_vlan>30</end_point_vlan_map_s_vlan>
+		<end_point_interface>
+			<interface_id>NNI_1</interface_id>
+			<interface_type>ENNI</interface_type>
+			<physical_port_reference_node_id>Router 10</physical_port_reference_node_id>
+			<physical_port_reference_port>Port 6</physical_port_reference_port>
+		</end_point_interface>
+	</ovc_end_point>
+</forwarding_construct>

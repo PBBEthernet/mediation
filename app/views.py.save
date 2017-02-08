@@ -1,0 +1,139 @@
+import os
+import sys
+import io
+import requests
+import xmltodict
+import xml.etree.ElementTree as ET
+from flask import jsonify, abort, make_response, render_template, request
+from flask.ext.httpauth import HTTPBasicAuth
+from app import app
+
+auth = HTTPBasicAuth()
+
+@auth.get_password
+def get_password(username):
+ if username == 'admin':
+    return 'admin'
+ return None
+
+@auth.error_handler
+def unauthorized():
+ return make_response(jsonify({'message': 'Unauthorized access'}), 403)
+
+
+@app.route('/')
+@app.route('/index')
+def index():
+	user = {'nickname': 'MNurujja'}
+	features = [  # array of features
+        	{ 
+            		'service': {'function': 'Create'}, 
+            		'uri': 'http://xxx.xx/yy/zz' 
+        	},
+        	{ 
+            		'service': {'function': 'Modify'}, 
+            		'uri': 'http://xxx.xx/yy/aa' 
+        	}
+    	]
+	return render_template('index.html',title='Home',user=user,features=features)
+
+
+@app.route('/api/devices', methods=['GET'])
+@auth.login_required
+def getDevices():
+ dev = requests.get("http://172.20.170.110:8080/api/running/devices/", auth=('admin','admin'))
+ #return (dev.text, dev.status_code, dev.headers.items())
+ d = xmltodict.parse(dev.text)
+ devXML = ET.Element('devices')
+ for device in d['devices']['device']:
+  if device['name'] == 'elab9075.elab.tata':
+   device1XML = ET.SubElement(devXML, 'device')
+   ET.SubElement(device1XML, 'id').text = 'dev1'
+   ET.SubElement(device1XML, 'name').text = 'EXC-TATA-Comcast'
+  if device['name'] == 'elab9085.elab.tata':
+   device2XML = ET.SubElement(devXML, 'device')
+   ET.SubElement(device2XML, 'id').text = 'dev2'
+   ET.SubElement(device2XML, 'name').text = 'EXC-TATA-Sparkle'
+ devicesXML = ET.tostring(devXML)
+ return devicesXML, dev.status_code, dev.headers.items()
+
+@app.route('/api/devices/interfaces/<string:devID>', methods=['GET'])
+@auth.login_required
+def getInterfaces(devID):
+ dev = ''
+ port = ''
+ if devID == 'dev1':
+  dev = 'elab9075.elab.tata'
+ if devID == 'dev2':
+  dev = 'elab9085.elab.tata'
+
+ ifs = requests.get("http://172.20.170.110:8080/api/running/devices/device/"+dev+"/config/interface/", auth=('admin','admin'))
+ ifsDict = xmltodict.parse(ifs.text)
+ ifsXML = ET.Element('interfaces')
+ if ifs.status_code == 200:
+  for ifsD in ifsDict['interface']['GigabitEthernet']:
+   if (devID=='dev1') and (ifsD['id']=='0/0/0/16'):
+    if1XML = ET.SubElement(ifsXML, 'inerface')
+    ET.SubElement(if1XML, 'id').text = 'dev1p1'
+    ET.SubElement(if1XML, 'name').text = 'GE-TATA-Comcast'
+   if (devID == 'dev2') and (ifsD['id'] == '0/0/0/16'):
+    if1XML = ET.SubElement(ifsXML, 'inerface')
+    ET.SubElement(if1XML, 'id').text = 'dev2p1'
+    ET.SubElement(if1XML, 'name').text = 'GE-TATA-Sparkle'
+  ifssXML = ET.tostring(ifsXML)
+  return ifssXML, ifs.status_code, ifs.headers.items()
+ else:
+  return 'No device found!'
+
+@app.route('/api/services', methods=['GET'])
+@auth.login_required
+def getServices():
+ services = requests.get("http://172.20.170.110:8080/api/running/services/", auth=('admin','admin'))
+ return (services.text, services.status_code, services.headers.items())
+
+@app.route('/api/services/<string:serviceName>', methods=['GET'])
+@auth.login_required
+def getService(serviceName):
+ service = requests.get("http://172.20.170.110:8080/api/running/services/pbb-evpl/"+serviceName+"/uni-endpoints", auth=('admin','admin'))
+ return (service.text, service.status_code, service.headers.items())
+
+@app.route('/api/services/construct', methods=['POST'])
+@auth.login_required
+def createServices():
+ try:
+  with open('/poc/app/service.xml') as f:
+   xmlTATA = xmltodict.parse(f) 
+#  content=open('/poc/app/service2.xml', 'rb')
+  xmlECI = xmltodict.parse(request.data)
+#  xmlTATA['services']['pbb-evpl']['name'] = xmlECI['forwarding_construct']['id']
+  xmlTATA['services']['pbb-evpl']['name'] = 'EBD100001'
+  xmlTATA['services']['pbb-evpl']['bandwidth'] = xmlECI['forwarding_construct']['ovc_end_point'][0]['ingress_bw_cfg_cir']
+  for endpoint in xmlECI['forwarding_construct']['ovc_end_point']:
+   if endpoint['end_point_id'] == 'TATA.Comcast.P1':
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][0]['device'] = 'elab9075.elab.tata'
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][0]['interface'] = 'GigabitEthernet0/0/0/16'
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][0]['port-type'] = 'service-vlan'
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][0]['svlan'] = endpoint['end_point_vlan_map_s_vlan']
+#    xmlTATA['services']['pbb-evpl']['uni-endpoints'][0]['ingress-vlan'] = 'comcastPOC'     #for NNI, ingress-vlan will not be used. this value will be used as a string to create sub-interface name  
+   if endpoint['end_point_id'] == 'TATA.Sparkle.P1':
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][1]['device'] = 'elab9085.elab.tata'
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][1]['interface'] = 'GigabitEthernet0/0/0/16'
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][1]['port-type'] = 'service-vlan'
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][1]['svlan'] = endpoint['end_point_vlan_map_s_vlan']
+#    xmlTATA['services']['pbb-evpl']['uni-endpoints'][1]['ingress-vlan'] = 'sparklePOC'     #for NNI, ingress-vlan will not be used. this value will be used as a string to create sub-interface name
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][1]['operation'] = 'translate'
+    xmlTATA['services']['pbb-evpl']['uni-endpoints'][1]['operation-vlan'] = 3000
+  
+  content = xmltodict.unparse(xmlTATA, pretty=True)
+  r = requests.patch("http://172.20.170.110:8080/api/running/services/",auth=('admin','admin'),data=content)
+  return r.text, r.status_code
+ except Exception, e:
+  response = requests.Response 
+  return (str(e))
+
+@app.route('/api/services/construct/<string:serviceName>', methods=['DELETE'])
+@auth.login_required
+def deleteService(serviceName):
+ if os.path.isfile('/pco/app/
+ r = requests.delete("http://172.20.170.110:8080/api/running/services/pbb-evpl/"+serviceName,auth=('admin','admin'))
+ return r.content, r.status_code

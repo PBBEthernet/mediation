@@ -1,0 +1,14 @@
+<html>
+  <head>
+    {% if title %}
+    <title>{{ title }} - TATA PoC</title>
+    {% else %}
+    <title>Welcome to TATA PoC</title>
+    {% endif %}
+  </head>
+  <body>
+    <div>PoC: <a href="/index">Home</a></div>
+    <hr>
+    {% block content %}{% endblock %}
+  </body>
+</html>
