@@ -9,4 +9,4 @@ if __name__ == '__main__':
  hdlr.setFormatter(formatter)
  app.logger.addHandler(hdlr)
  app.logger.setLevel(logging.INFO)
- app.run(host='10.0.0.230', port=8080, debug=True)
+ app.run(host='0.0.0.0', port=8080, debug=True)
