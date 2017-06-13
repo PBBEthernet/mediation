@@ -1,4 +1,4 @@
-#!flask/bin/python
+#python
 import logging
 from datetime import datetime
 from app import app
