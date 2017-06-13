@@ -7,7 +7,7 @@ from datetime import datetime
 import xmltodict
 import xml.etree.ElementTree as ET
 from flask import jsonify, abort, make_response, render_template, request, Response, url_for
-from flask.ext.httpauth import HTTPBasicAuth
+from flask_httpauth import HTTPBasicAuth
 from app import app
 
 #app.logger = logging.getLogger('NSOREST')
