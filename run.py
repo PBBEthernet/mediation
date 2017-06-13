@@ -4,7 +4,7 @@ from datetime import datetime
 from app import app
 
 if __name__ == '__main__':
- hdlr = logging.FileHandler('/poc/app/server.log')
+ hdlr = logging.FileHandler('/app/server.log')
  formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
  hdlr.setFormatter(formatter)
  app.logger.addHandler(hdlr)
